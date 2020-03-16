@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>home</title>
+</head>
+<body>
+    <form
+        action="{% url 'moodFlip:get_playlist'%}"
+        method="post">
+        {% csrf_token %}
+
+        <input
+            id="token"
+            type="text"
+            name="token"
+            value="{{ token }}">
+        <input type="submit" value="get_playlist">
+
+
+    </form>
+</body>
+</html>

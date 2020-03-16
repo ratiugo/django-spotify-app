@@ -17,6 +17,6 @@ from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
-    path("radio/", include("radioFromRecentlyPlayedTracks.urls")),
+    path("", include("moodFlip.urls")),
     path('admin/', admin.site.urls),
 ]
