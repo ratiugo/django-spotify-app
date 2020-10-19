@@ -1,16 +1,15 @@
-from django.shortcuts import render
-from rest_framework.response import Response
-from .services import Create_User, Playlist
+from django.http import HttpResponse
+from .services import Pipeline
 
 
 #Log in to Spotify, and grab all needed data about the User/playlists/tracks
-def login(request):
+def home(request):
 
-    #create a SpotifyServices instance to create User/Playlist/Track models
-    user =User()
-    playlists_name_image = user.login()
+    pipeline = Pipeline()
 
-    return Response(status=status.HTTP_200_OK)
+    pipeline.run()
+
+    return HttpResponse(status = 200)
 
 
 

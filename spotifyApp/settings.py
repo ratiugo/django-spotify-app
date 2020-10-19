@@ -32,7 +32,6 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'moodFlip.apps.MoodFlipConfig',
-    'rest_framework',
     'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
