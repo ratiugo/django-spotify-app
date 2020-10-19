@@ -1,4 +1,5 @@
-# django-spotify-app
+### django-spotify-app
 
-Need to install Spotipy - in the root directory:
+## Required packages
+# Spotipy
 `pip3 install spotipy --upgrade`
