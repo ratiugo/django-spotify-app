@@ -1,5 +1,5 @@
 from django.http import HttpResponse
-from .services import Pipeline
+from .spotify_pipeline import Pipeline
 
 
 #Log in to Spotify, and grab all needed data about the User/playlists/tracks
