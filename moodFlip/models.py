@@ -55,7 +55,7 @@ class Track(models.Model):
         null=True
         )
 
-    valence = models.DecimalField(
+    mood = models.DecimalField(
         decimal_places=3,
         max_digits=5,
         null=True

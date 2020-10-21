@@ -15,6 +15,7 @@ class Pipeline():
         self.spotipyObject = None
         self.current_user = None
         self.playlist_objects = None
+        self.playlists = None
 
     #login to spotify using spotipy
     def login(self):
@@ -50,6 +51,8 @@ class Pipeline():
 
         for item in playlists:
             playlist_items = spotify.playlist_tracks(item["id"])["items"]
+            playlist_image = spotify.playlist_cover_image(item["id"])
+            playlist_tracks_object = {}
             playlist_tracks = []
 
             for playlist in playlist_items:
@@ -60,13 +63,18 @@ class Pipeline():
                 owner = self.current_user,
                 name = item["name"],
                 playlist_href = item["id"],
-                image_url = ("https://www.desicomments.com/wp-content/uploads/2018/09/Im-So-So-So-So-So-Sorry.jpg"
-                             if spotify.playlist_cover_image(item["id"]) == []
-                             else spotify.playlist_cover_image(item["id"])[0]["url"]),
-                tracks = playlist_tracks)
+                image_url = ("https://www.desicomments.com/wp-content/uploads/\
+                             2018/09/Im-So-So-So-So-So-Sorry.jpg"
+                             if  playlist_image == []
+                             else playlist_image[0]["url"]))
+
+            playlist_tracks_object[item["name"]] = playlist_tracks
+
             playlist_objects.append(playlist_object)
 
         self.playlist_objects = playlist_objects
+        self.playlists = playlist_tracks_object
+
         Playlist.objects.bulk_create(playlist_objects)
 
         return self
@@ -74,10 +82,28 @@ class Pipeline():
     def create_tracks(self):
         spotify = self.spotipyObject
         playlist_objects = self.playlist_objects
+        playlists = self.playlists
 
         for playlist in playlist_objects:
-            print("\nAudio features:")
-            print(playlist["tracks"])
+            for track in playlist_tracks[playlist["name"]]:
+                audio_features = spotify.audio_features(track["id"])
+
+                if audio_features[0] is None:
+                    pass
+                else:
+                    valence = audio_features[0]["valence"]
+
+                track_object = Track(
+                    belongs_to_playlist = playlist["name"],
+                    title = track["name"],
+                    artist = track["artists"][0]["name"],
+                    artistID = track["artists"][0]["id"],
+                    mood = valence
+                    )
+
+                track_objects.append(track_object)
+
+        Track.objects.bulk_create(track_objects)
 
         return self
 #         if self.track["track"] is None:
