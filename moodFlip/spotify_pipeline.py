@@ -69,7 +69,6 @@ class Pipeline():
                              else playlist_image[0]["url"]))
 
             playlist_tracks_object[item["name"]] = playlist_tracks
-
             playlist_objects.append(playlist_object)
 
         self.playlist_objects = playlist_objects
@@ -83,27 +82,30 @@ class Pipeline():
         spotify = self.spotipyObject
         playlist_objects = self.playlist_objects
         playlists = self.playlists
+        track_objects = []
+        print(playlists)
+        # for playlist in playlist_objects:
+        #     if getattr(playlist, "name") in playlists:
+        #         print(getattr(playlist, "name"))
+        #         for track in playlists[getattr(playlist, "name")]:
+        #             audio_features = spotify.audio_features(track["id"])
 
-        for playlist in playlist_objects:
-            for track in playlist_tracks[playlist["name"]]:
-                audio_features = spotify.audio_features(track["id"])
+        #             if audio_features[0] is None:
+        #                 pass
+        #             else:
+        #                 valence = audio_features[0]["valence"]
 
-                if audio_features[0] is None:
-                    pass
-                else:
-                    valence = audio_features[0]["valence"]
+        #             track_object = Track(
+        #                 belongs_to_playlist = playlist,
+        #                 title = track["name"],
+        #                 artist = track["artists"][0]["name"],
+        #                 artistID = track["artists"][0]["id"],
+        #                 mood = valence
+        #                 )
 
-                track_object = Track(
-                    belongs_to_playlist = playlist["name"],
-                    title = track["name"],
-                    artist = track["artists"][0]["name"],
-                    artistID = track["artists"][0]["id"],
-                    mood = valence
-                    )
+        #             track_objects.append(track_object)
 
-                track_objects.append(track_object)
-
-        Track.objects.bulk_create(track_objects)
+        # Track.objects.bulk_create(track_objects)
 
         return self
 #         if self.track["track"] is None:
