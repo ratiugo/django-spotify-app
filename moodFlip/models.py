@@ -33,7 +33,9 @@ class Playlist(models.Model):
 
 
 class Track(models.Model):
-    belongs_to_playlist = models.ManyToManyField(Playlist)
+    belongs_to_playlist = models.ForeignKey(Playlist,
+        on_delete=models.CASCADE,
+        null=True)
 
     title = models.CharField(
         max_length = 200,

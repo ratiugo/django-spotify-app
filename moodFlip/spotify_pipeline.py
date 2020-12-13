@@ -1,23 +1,22 @@
-#business logic
 import sys
 import spotipy
 import spotipy.util as util
 import json
 from .models import User, Track, Playlist
-from multiprocessing import Pool
-import threading
-from functools import partial
 
 
-class Pipeline():
+class SpotifyPipeline():
+    """
+    Pipeline to login and create User, Track and Playlist objects and store them
+    to the database.
+    """
 
     def __init__(self):
         self.spotipyObject = None
         self.current_user = None
-        self.playlist_objects = None
-        self.playlists = None
+        self.playlist_tracks = None
 
-    #login to spotify using spotipy
+
     def login(self):
 
         scope = "user-library-read user-read-recently-played"
@@ -50,28 +49,28 @@ class Pipeline():
         playlist_objects = []
         playlist_tracks_object = {}
 
-        for item in playlists:
-            playlist_items = spotify.playlist_tracks(item["id"])["items"]
-            playlist_image = spotify.playlist_cover_image(item["id"])
+        for playlist in playlists:
+            playlist_items = spotify.playlist_tracks(playlist["id"])["items"]
+            playlist_image = spotify.playlist_cover_image(playlist["id"])
             playlist_tracks = []
 
-            for playlist in playlist_items:
-                if playlist["track"]:
-                    playlist_tracks.append(playlist["track"])
+            for track in playlist_items:
+                if track["track"]:
+                    playlist_tracks.append(track["track"])
 
             playlist_object = Playlist(
                 owner = self.current_user,
-                name = item["name"],
-                playlist_href = item["id"],
+                name = playlist["name"],
+                playlist_href = playlist["id"],
                 image_url = ("https://www.desicomments.com/wp-content/uploads/\
                              2018/09/Im-So-So-So-So-So-Sorry.jpg"
                              if  playlist_image == []
                              else playlist_image[0]["url"]))
-            playlist_tracks_object[item["name"]] = playlist_tracks
+            playlist_object.save()
+            playlist_tracks_object[playlist["name"]] = playlist_tracks
             playlist_objects.append(playlist_object)
 
-        self.playlist_objects = playlist_objects
-        self.playlists = playlist_tracks_object
+        self.playlist_tracks = playlist_tracks_object
 
         Playlist.objects.bulk_create(playlist_objects)
 
@@ -79,31 +78,33 @@ class Pipeline():
 
     def create_tracks(self):
         spotify = self.spotipyObject
-        playlist_objects = self.playlist_objects
-        playlists = self.playlists
-        track_objects = []
-        for playlist in playlist_objects:
-            if getattr(playlist, "name") in playlists:
-                for track in playlists[getattr(playlist, "name")]:
-                    audio_features = spotify.audio_features(track["id"])
+        playlist_tracks = self.playlist_tracks
 
-                    if audio_features[0] is None:
-                        pass
-                    else:
-                        valence = audio_features[0]["valence"]
+        for playlist_name, tracks in playlist_tracks.items():
+            playlist = Playlist.objects.filter(name=playlist_name)
+            track_objects = []
 
-                    track_object = Track(
+            for track in tracks:
+                audio_features = spotify.audio_features(track['id'])
+
+                if audio_features[0] is None:
+                    pass
+                else:
+                    valence = audio_features[0]['valence']
+
+                track_object = Track(
                         title = track["name"],
                         artist = track["artists"][0]["name"],
                         artistID = track["artists"][0]["id"],
-                        mood = valence
+                        mood = valence,
+                        belongs_to_playlist = playlist
                         )
-                    track_object.save()
-                    track_object.belongs_to_playlist.add(playlist)
+                track_object.save()
+                track_objects.append(track_object)
 
-                    track_objects.append(track_object)
+            Track.objects.bulk_create(track_objects)
 
-        Track.objects.bulk_create(track_objects)
+
 
         return self
 #         if self.track["track"] is None:
